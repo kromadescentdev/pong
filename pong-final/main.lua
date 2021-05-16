@@ -91,6 +91,7 @@ function love.load()
 
     -- initialize our player paddles; make them global so that they can be
     -- detected by other functions and modules
+        
     player1 = Paddle(10, 30, 5, 20)
     player2 = Paddle(VIRTUAL_WIDTH - 10, VIRTUAL_HEIGHT - 30, 5, 20)
 
@@ -135,6 +136,7 @@ end
     changes we make will be applied as fast as possible and will vary
     across system hardware.
 ]]
+--Note to Student, Update handles physics
 function love.update(dt)
     if gameState == 'serve' then
         -- before switching to play, initialize ball's velocity based
@@ -228,15 +230,30 @@ function love.update(dt)
     --
     -- paddles can move no matter what state we're in
     --
+    -- Joshua Morris opted to implement the AI to player 1
     -- player 1
-    if love.keyboard.isDown('w') then
-        player1.dy = -PADDLE_SPEED
-    elseif love.keyboard.isDown('s') then
-        player1.dy = PADDLE_SPEED
-    else
-        player1.dy = 0
-    end
+    --use point-slope to find the place where the ball is going to intersect
+    --with the paddle, and name that y location targetY
+    --
 
+    if gameState == 'play' then --only uses the AI at the play gameState
+        targetY = (VIRTUAL_HEIGHT / 2) --a default value for targetY so the compiler knows it is a number
+        
+        if ball.dx ~= 0 then --catches errors when .dx is zero
+            targetY = (((ball.dy / ball.dx)*(player1.x-ball.x)) + ball.y)
+            --from point-slope   
+        end
+
+        --i must offet by half of the height of the paddle because of how it is drawn
+        print(player1.y)
+        if (player1.y --[[ - player1.height/2) ]] ) > targetY then --if it is below
+                player1.dy= -PADDLE_SPEED --move up
+            elseif (player1.y + player1.height/2) < targetY then --if it is above
+                player1.dy = PADDLE_SPEED -- move down
+            else
+                player1.dy = 0
+        end
+    end
     -- player 2
     if love.keyboard.isDown('up') then
         player2.dy = -PADDLE_SPEED
